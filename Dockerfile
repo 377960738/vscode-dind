@@ -37,32 +37,28 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	build-essential \
 	curl \
 	wget \
-	gnupg \
-	lsb-release \
-	software-properties-common \
+	git \
 	ca-certificates \
 	&& rm -rf /var/lib/apt/lists/*
 
-# 安装 Python（使用 deadsnakes PPA 支持多个版本）
+# 安装 Miniconda（支持多个 Python 版本，更稳定）
 ARG PYTHON_VERSION=3.11
-RUN apt-get update && \
-	apt-get install -y --no-install-recommends \
-	python3-software-properties \
-	python3-apt \
-	&& add-apt-repository -y ppa:deadsnakes/ppa || true && \
-	apt-get update && \
-	apt-get install -y --no-install-recommends \
-	python${PYTHON_VERSION} \
-	python${PYTHON_VERSION}-pip \
-	python${PYTHON_VERSION}-venv \
-	python${PYTHON_VERSION}-dev \
-	|| apt-get install -y --no-install-recommends python3-pip python3-venv python3-dev && \
-	update-alternatives --install /usr/bin/python3 python3 /usr/bin/python${PYTHON_VERSION} 1 2>/dev/null || \
-	update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3 1 && \
-	update-alternatives --install /usr/bin/pip3 pip3 /usr/bin/pip${PYTHON_VERSION} 1 2>/dev/null || \
-	update-alternatives --install /usr/bin/pip3 pip3 /usr/bin/pip3 1 && \
-	python3 -m pip install --upgrade pip setuptools wheel && \
-	rm -rf /var/lib/apt/lists/*
+RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh && \
+	bash /tmp/miniconda.sh -b -p /opt/conda && \
+	rm /tmp/miniconda.sh && \
+	/opt/conda/bin/conda clean -afy && \
+	/opt/conda/bin/conda config --system --prepend channels conda-forge && \
+	/opt/conda/bin/conda install -y "python=${PYTHON_VERSION}.*" && \
+	/opt/conda/bin/conda clean -afy && \
+	ln -s /opt/conda/bin/python /usr/local/bin/python3 && \
+	ln -s /opt/conda/bin/pip /usr/local/bin/pip3
+
+# 更新 Python 和 pip
+RUN /opt/conda/bin/pip install --upgrade pip setuptools wheel
+
+# 设置 conda 初始化
+RUN echo ". /opt/conda/etc/profile.d/conda.sh" >> /etc/bash.bashrc && \
+	echo "conda activate base" >> /etc/bash.bashrc
 
 # 安装 Node.js（使用 NodeSource 仓库，支持版本指定）
 ARG NODE_VERSION=20
