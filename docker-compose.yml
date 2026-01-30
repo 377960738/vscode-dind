@@ -6,7 +6,6 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        PYTHON_VERSION: ${PYTHON_VERSION:-3.11}
         NODE_VERSION: ${NODE_VERSION:-20}
     container_name: vscode-dev
     image: vscode-dind:dev

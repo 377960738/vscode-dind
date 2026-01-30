@@ -13,6 +13,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	openssh-server \
 	sudo \
 	ca-certificates \
+	python3-pip \
+	python3-dev \
 	&& rm -rf /var/lib/apt/lists/*
 
 # 配置 SSH 服务
@@ -31,43 +33,14 @@ RUN usermod -aG docker coder && \
 # 创建工作目录
 RUN mkdir -p /workspace && chown -R coder:coder /workspace
 
-# 安装常用开发工具（可选）
-# 安装基础工具和依赖
-RUN apt-get update && apt-get install -y --no-install-recommends \
-	build-essential \
-	curl \
-	wget \
-	git \
-	ca-certificates \
-	&& rm -rf /var/lib/apt/lists/*
+# 升级 pip
+RUN python3 -m pip install --upgrade pip setuptools wheel
 
-# 安装 Miniconda（支持多个 Python 版本，更稳定）
-ARG PYTHON_VERSION=3.11
-RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh && \
-	bash /tmp/miniconda.sh -b -p /opt/conda && \
-	rm /tmp/miniconda.sh && \
-	/opt/conda/bin/conda clean -afy && \
-	/opt/conda/bin/conda config --system --prepend channels conda-forge && \
-	/opt/conda/bin/conda install -y "python=${PYTHON_VERSION}.*" && \
-	/opt/conda/bin/conda clean -afy && \
-	ln -s /opt/conda/bin/python /usr/local/bin/python3 && \
-	ln -s /opt/conda/bin/pip /usr/local/bin/pip3
-
-# 更新 Python 和 pip
-RUN /opt/conda/bin/pip install --upgrade pip setuptools wheel
-
-# 设置 conda 初始化
-RUN echo ". /opt/conda/etc/profile.d/conda.sh" >> /etc/bash.bashrc && \
-	echo "conda activate base" >> /etc/bash.bashrc
-
-# 安装 Node.js（使用 NodeSource 仓库，支持版本指定）
+# 安装 Node.js（支持版本指定）
 ARG NODE_VERSION=20
-RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - || \
-	curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
-	apt-get update && \
-	apt-get install -y --no-install-recommends \
-	nodejs \
-	&& rm -rf /var/lib/apt/lists/*
+RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - && \
+	apt-get update && apt-get install -y --no-install-recommends nodejs && \
+	rm -rf /var/lib/apt/lists/*
 
 # 切换回 coder 用户
 USER coder
@@ -79,14 +52,6 @@ WORKDIR /workspace
 EXPOSE 8443 22
 
 # 启动脚本
-RUN echo '#!/bin/bash\n\
-	set -e\n\
-	\n\
-	# 启动 SSH 服务\n\
-	sudo /etc/init.d/ssh start\n\
-	\n\
-	# 启动 code-server\n\
-	exec code-server --bind-addr 0.0.0.0:8443 /workspace\n\
-	' > /tmp/entrypoint.sh && chmod +x /tmp/entrypoint.sh
+RUN echo '#!/bin/bash\nset -e\nsudo /etc/init.d/ssh start\nexec code-server --bind-addr 0.0.0.0:8443 /workspace\n' > /tmp/entrypoint.sh && chmod +x /tmp/entrypoint.sh
 
 ENTRYPOINT ["/tmp/entrypoint.sh"]
