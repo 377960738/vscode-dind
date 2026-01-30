@@ -3,7 +3,7 @@ FROM codercom/code-server:latest
 
 USER root
 
-# 更新包管理器
+# 安装基础工具
 RUN apt-get update && apt-get install -y --no-install-recommends \
 	docker.io \
 	docker-compose \
@@ -24,17 +24,13 @@ RUN mkdir -p /run/sshd && \
 	sed -i 's/^AllowTcpForwarding.*/AllowTcpForwarding yes/' /etc/ssh/sshd_config && \
 	sed -i 's/^GatewayPorts.*/GatewayPorts yes/' /etc/ssh/sshd_config
 
-
-# coder 用户添加到 docker 组
+# coder 用户添加到 docker 和 sudo 组
 RUN usermod -aG docker coder && \
 	usermod -aG sudo coder && \
 	echo "coder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # 创建工作目录
 RUN mkdir -p /workspace && chown -R coder:coder /workspace
-
-# 升级 pip
-RUN python3 -m pip install --upgrade pip setuptools wheel
 
 # 安装 Node.js（支持版本指定）
 ARG NODE_VERSION=20
