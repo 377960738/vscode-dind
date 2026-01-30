@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  vscode-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PYTHON_VERSION: ${PYTHON_VERSION:-3.11}
+        NODE_VERSION: ${NODE_VERSION:-20}
+    container_name: vscode-dev
+    image: vscode-dind:dev
+
+    # 核心：共享宿主机 Docker socket
+    volumes:
+      # Docker socket 挂载（与宿主机 Docker daemon 通信）
+      - /var/run/docker.sock:/var/run/docker.sock
+
+      # 持久化 code-server 配置和扩展
+      - vscode-config:/home/coder/.config/code-server
+      - vscode-local:/home/coder/.local/share/code-server
+
+      # 项目目录挂载
+      # - project-dir:/workspace/<project-dir>
+
+      # SSH 密钥挂载（可选）
+      # - ~/.ssh:/home/coder/.ssh:ro
+
+    # 端口映射
+    ports:
+      # code-server web UI
+      - "8443:8443"
+      # SSH 访问
+      - "2222:22"
+
+    # 环境变量
+    environment:
+      # code-server 密码（推荐使用，或者使用 token）
+      PASSWORD: ${VSCODE_PASSWORD:-password}
+      SUDO_PASSWORD: ${VSCODE_PASSWORD:-password}
+
+      # Docker 相关
+      DOCKER_HOST: unix:///var/run/docker.sock
+
+      # code-server 配置
+      PROXY_DOMAIN: localhost
+
+    # 网络配置
+    networks:
+      - dev-network
+
+    # 重启策略
+    restart: unless-stopped
+
+    # 资源限制（可选）
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '2'
+    #       memory: 4G
+    #     reservations:
+    #       cpus: '1'
+    #       memory: 2G
+
+volumes:
+  # code-server 配置文件
+  vscode-config:
+    driver: local
+
+  # code-server 扩展插件
+  vscode-local:
+    driver: local
+
+networks:
+  dev-network:
+    driver: bridge
