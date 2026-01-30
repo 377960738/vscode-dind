@@ -36,25 +36,39 @@ RUN mkdir -p /workspace && chown -R coder:coder /workspace
 RUN apt-get update && apt-get install -y --no-install-recommends \
 	build-essential \
 	curl \
+	wget \
 	gnupg \
 	lsb-release \
+	software-properties-common \
+	ca-certificates \
 	&& rm -rf /var/lib/apt/lists/*
 
-# 安装 Python（从源，支持版本指定）
+# 安装 Python（使用 deadsnakes PPA 支持多个版本）
 ARG PYTHON_VERSION=3.11
 RUN apt-get update && \
+	apt-get install -y --no-install-recommends \
+	python3-software-properties \
+	python3-apt \
+	&& add-apt-repository -y ppa:deadsnakes/ppa || true && \
+	apt-get update && \
 	apt-get install -y --no-install-recommends \
 	python${PYTHON_VERSION} \
 	python${PYTHON_VERSION}-pip \
 	python${PYTHON_VERSION}-venv \
 	python${PYTHON_VERSION}-dev \
-	&& update-alternatives --install /usr/bin/python3 python3 /usr/bin/python${PYTHON_VERSION} 1 \
-	&& update-alternatives --install /usr/bin/pip3 pip3 /usr/bin/pip${PYTHON_VERSION} 1 \
-	&& rm -rf /var/lib/apt/lists/*
+	|| apt-get install -y --no-install-recommends python3-pip python3-venv python3-dev && \
+	update-alternatives --install /usr/bin/python3 python3 /usr/bin/python${PYTHON_VERSION} 1 2>/dev/null || \
+	update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3 1 && \
+	update-alternatives --install /usr/bin/pip3 pip3 /usr/bin/pip${PYTHON_VERSION} 1 2>/dev/null || \
+	update-alternatives --install /usr/bin/pip3 pip3 /usr/bin/pip3 1 && \
+	python3 -m pip install --upgrade pip setuptools wheel && \
+	rm -rf /var/lib/apt/lists/*
 
 # 安装 Node.js（使用 NodeSource 仓库，支持版本指定）
 ARG NODE_VERSION=20
-RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - && \
+RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - || \
+	curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+	apt-get update && \
 	apt-get install -y --no-install-recommends \
 	nodejs \
 	&& rm -rf /var/lib/apt/lists/*
