@@ -278,3 +278,22 @@ A: 修改 Dockerfile 的 `RUN apt-get install` 部分，重新构建镜像。
 - [code-server 官方文档](https://coder.com/docs/code-server)
 - [VSCode Remote 文档](https://code.visualstudio.com/docs/remote/remote-overview)
 - [Docker 官方文档](https://docs.docker.com/)
+
+## 一键启动脚本说明
+
+项目提供 `start.sh`，脚本会：
+
+- 构建并启动 `docker compose` 服务（`vscode-dev`）
+- 确保命名卷存在并修正卷属主为容器内 `coder` 用户
+- 在容器内设置 `coder` 用户的 SSH 密码（从 `.env` 的 `VSCODE_PASSWORD`/`PASSWORD` 或 `SUDO_PASSWORD` 读取）
+- 读取宿主 `/var/run/docker.sock` 的 GID，尝试在容器内创建同 GID 的组并把 `coder` 加入（以便容器内可使用 Docker CLI）
+
+使用方法：
+
+```bash
+chmod +x start.sh
+./start.sh
+```
+
+注意：脚本会尝试自动修复常见权限问题，但某些环境下可能需要手动在宿主机上调整 `/var/run/docker.sock` 的权限（例如 `sudo chown root:<gid> /var/run/docker.sock && sudo chmod 660 /var/run/docker.sock`）。
+
