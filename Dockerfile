@@ -48,6 +48,7 @@ WORKDIR /workspace
 EXPOSE 8443 22
 
 # 启动脚本
-RUN echo '#!/bin/bash\nset -e\nsudo /etc/init.d/ssh start\nexec code-server --bind-addr 0.0.0.0:8443 /workspace\n' > /tmp/entrypoint.sh && chmod +x /tmp/entrypoint.sh
+COPY entrypoint.sh /tmp/entrypoint.sh
+RUN chmod +x /tmp/entrypoint.sh
 
 ENTRYPOINT ["/tmp/entrypoint.sh"]
