@@ -5,6 +5,7 @@ USER root
 
 # 安装基础工具
 RUN apt-get update && apt-get install -y --no-install-recommends \
+	tini \
 	docker.io \
 	docker-compose \
 	git \
@@ -47,7 +48,8 @@ WORKDIR /workspace
 # 暴露端口
 EXPOSE 8443 22
 
-# 启动脚本
-RUN echo '#!/bin/bash\nset -e\nsudo /etc/init.d/ssh start\nexec code-server --bind-addr 0.0.0.0:8443 /workspace\n' > /tmp/entrypoint.sh && chmod +x /tmp/entrypoint.sh
+# 复制 entrypoint 脚本
+COPY entrypoint.sh /entrypoint.sh
 
-ENTRYPOINT ["/tmp/entrypoint.sh"]
+# 设置为入口点
+ENTRYPOINT ["/usr/bin/tini", "--", "bash", "/entrypoint.sh"]

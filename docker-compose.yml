@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   vscode-dev:
     build:
@@ -7,20 +5,18 @@ services:
       dockerfile: Dockerfile
       args:
         NODE_VERSION: ${NODE_VERSION:-20}
-    container_name: vscode-dev
-    image: vscode-dind:dev
+    container_name: ${CONTAINER_NAME:-vscode-dind}
+    image: ${REGISTRY_IMAGE:vscode-dind}:${TAG:-dev}
 
-    # 核心：共享宿主机 Docker socket
     volumes:
       # Docker socket 挂载（与宿主机 Docker daemon 通信）
-      - /var/run/docker.sock:/var/run/docker.sock
+      - ${DOCKER_SOCKET:-/var/run/docker.sock}:/var/run/docker.sock
 
-      # 持久化 code-server 配置和扩展
-      - vscode-config:/home/coder/.config/code-server
-      - vscode-local:/home/coder/.local/share/code-server
+      # 持久化 coder 用户目录
+      - user-dir:/home/coder
 
       # 项目目录挂载
-      # - project-dir:/workspace/<project-dir>
+      - workspace-dir:/workspace
 
       # SSH 密钥挂载（可选）
       # - ~/.ssh:/home/coder/.ssh:ro
@@ -28,21 +24,14 @@ services:
     # 端口映射
     ports:
       # code-server web UI
-      - "8443:8443"
+      - "${CODE_SERVER_PORT:-8443}:8443"
       # SSH 访问
-      - "2222:22"
+      - "${SSH_PORT:-2222}:22"
 
     # 环境变量
     environment:
-      # code-server 密码（推荐使用，或者使用 token）
-      PASSWORD: ${VSCODE_PASSWORD:-password}
-      SUDO_PASSWORD: ${VSCODE_PASSWORD:-password}
-
-      # Docker 相关
-      DOCKER_HOST: unix:///var/run/docker.sock
-
-      # code-server 配置
-      PROXY_DOMAIN: localhost
+      - DOCKER_TLS_VERIFY=${DOCKER_TLS_VERIFY:-0}
+      - DIND_PASSWORD=${DIND_PASSWORD:-password}
 
     # 网络配置
     networks:
@@ -62,12 +51,10 @@ services:
     #       memory: 2G
 
 volumes:
-  # code-server 配置文件
-  vscode-config:
+  user-dir:
     driver: local
 
-  # code-server 扩展插件
-  vscode-local:
+  workspace-dir:
     driver: local
 
 networks:
