@@ -5,6 +5,7 @@ services:
       dockerfile: Dockerfile
       args:
         NODE_VERSION: ${NODE_VERSION:-20}
+        PHP_VERSION: ${PHP_VERSION:-8.2}
     container_name: ${CONTAINER_NAME:-vscode-dind}
     image: ${REGISTRY_IMAGE:-vscode-dind}:${TAG:-dev}
 

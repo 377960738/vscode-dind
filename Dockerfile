@@ -39,6 +39,50 @@ RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - && \
 	apt-get update && apt-get install -y --no-install-recommends nodejs && \
 	rm -rf /var/lib/apt/lists/*
 
+# 安装 PHP（支持版本指定）
+ARG PHP_VERSION=8.2
+RUN curl -fsSL https://packages.sury.org/php/README.txt | bash - && \
+	apt-get update && apt-get install -y --no-install-recommends \
+	php${PHP_VERSION} \
+	php${PHP_VERSION}-cli \
+	php${PHP_VERSION}-fpm \
+	php${PHP_VERSION}-apcu \
+	php${PHP_VERSION}-bcmath \
+	php${PHP_VERSION}-curl \
+	php${PHP_VERSION}-gd \
+	php${PHP_VERSION}-gettext \
+	php${PHP_VERSION}-igbinary \
+	php${PHP_VERSION}-intl \
+	php${PHP_VERSION}-mbstring \
+	php${PHP_VERSION}-mongodb \
+	php${PHP_VERSION}-mysql \
+	php${PHP_VERSION}-opcache \
+	php${PHP_VERSION}-pgsql \
+	php${PHP_VERSION}-pdo \
+	php${PHP_VERSION}-pdo_mysql \
+	php${PHP_VERSION}-pdo_pgsql \
+	php${PHP_VERSION}-pdo_sqlite \
+	php${PHP_VERSION}-redis \
+	php${PHP_VERSION}-soap \
+	php${PHP_VERSION}-sockets \
+	php${PHP_VERSION}-sodium \
+	php${PHP_VERSION}-sqlite3 \
+	php${PHP_VERSION}-swoole \
+	php${PHP_VERSION}-xml \
+	php${PHP_VERSION}-xmlreader \
+	php${PHP_VERSION}-xmlwriter \
+	php${PHP_VERSION}-yaml \
+	php${PHP_VERSION}-zip \
+	php${PHP_VERSION}-event \
+	php${PHP_VERSION}-inotify \
+	php${PHP_VERSION}-xlswriter && \
+	rm -rf /var/lib/apt/lists/* && \
+	echo "apc.enable_cli=1" > /etc/php/${PHP_VERSION}/cli/conf.d/20-apcu.ini && \
+	curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && \
+	chmod +x /usr/local/bin/composer && \
+	echo "alias ll='ls -l'" >> ~/.bashrc && \
+	echo "alias la='ls -la'" >> ~/.bashrc
+
 # 切换回 coder 用户
 USER coder
 
