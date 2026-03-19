@@ -46,45 +46,88 @@ RUN curl -fsSL https://packages.sury.org/php/README.txt | bash - && \
 	php${PHP_VERSION} \
 	php${PHP_VERSION}-cli \
 	php${PHP_VERSION}-fpm \
-	php${PHP_VERSION}-apcu \
-	php${PHP_VERSION}-bcmath \
-	php${PHP_VERSION}-curl \
-	php${PHP_VERSION}-gd \
-	php${PHP_VERSION}-gettext \
-	php${PHP_VERSION}-igbinary \
-	php${PHP_VERSION}-intl \
-	php${PHP_VERSION}-mbstring \
-	php${PHP_VERSION}-mongodb \
-	php${PHP_VERSION}-mysql \
-	php${PHP_VERSION}-opcache \
-	php${PHP_VERSION}-pgsql \
-	php${PHP_VERSION}-pdo \
-	php${PHP_VERSION}-pdo_mysql \
-	php${PHP_VERSION}-pdo_pgsql \
-	php${PHP_VERSION}-pdo_sqlite \
-	php${PHP_VERSION}-redis \
-	php${PHP_VERSION}-soap \
-	php${PHP_VERSION}-sockets \
-	php${PHP_VERSION}-sodium \
-	php${PHP_VERSION}-sqlite3 \
-	php${PHP_VERSION}-swoole \
-	php${PHP_VERSION}-xml \
-	php${PHP_VERSION}-xmlreader \
-	php${PHP_VERSION}-xmlwriter \
-	php${PHP_VERSION}-yaml \
-	php${PHP_VERSION}-zip \
-	php${PHP_VERSION}-event \
-	php${PHP_VERSION}-inotify \
-	php${PHP_VERSION}-xlswriter && \
-	rm -rf /var/lib/apt/lists/* && \
-	echo "apc.enable_cli=1" > /etc/php/${PHP_VERSION}/cli/conf.d/20-apcu.ini && \
-	curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && \
-	chmod +x /usr/local/bin/composer && \
+	# 安装 composer
+	wget -O /usr/bin/composer https://github.com/composer/composer/releases/latest/download/composer.phar && \
+	chmod +x /usr/bin/composer && \
+	\
+	# 使 busybox 支持特权命令
+	chmod 4755 /bin/busybox && \
+	\
+	# 安装 php-extension-installer
+	wget -O /usr/local/bin/install-php-extensions https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions && \
+	chmod +x /usr/local/bin/install-php-extensions && \
+	\
+	# 安装 PHP 扩展
+	# IPE_GD_WITHOUTAVIF=y \
+	# IPE_ICU_EN_ONLY=y \
+	IPE_SWOOLE_WITHOUT_IOURING=y \
+	install-php-extensions \
+	@fix_letsencrypt \
+	apcu \
+	bcmath \
+	Core \
+	ctype \
+	curl \
+	date \
+	dom \
+	event \
+	fileinfo \
+	filter\
+	gd \
+	gettext \
+	hash \
+	iconv\
+	igbinary \
+	inotify \
+	intl \
+	json \
+	libxml\
+	mbstring \
+	mongodb \
+	mysqlnd \
+	opcache \
+	openssl \
+	pcntl \
+	pcre \
+	PDO \
+	pdo_mysql \
+	pdo_pgsql \
+	pdo_sqlite \
+	Phar \
+	posix \
+	random \
+	readline \
+	redis \
+	Reflection \
+	session \
+	SimpleXML \
+	soap \
+	sockets \
+	sodium \
+	SPL \
+	sqlite3 \
+	standard \
+	swoole \
+	sysvmsg \
+	sysvsem \
+	swoole \
+	tokenizer \
+	xlswriter \
+	xml \
+	xmlreader \
+	xmlwriter \
+	yaml \
+	zip \
+	zlib && \
 	echo "alias ll='ls -l'" >> ~/.bashrc && \
 	echo "alias la='ls -la'" >> ~/.bashrc
 
 # 切换回 coder 用户
 USER coder
+
+# 设置 shell 别名（支持 ll 和 la 命令）
+RUN echo "alias ll='ls -la'" >> ~/.bashrc && \
+	echo "alias la='ls -la'" >> ~/.bashrc
 
 # 设置工作目录
 WORKDIR /workspace
