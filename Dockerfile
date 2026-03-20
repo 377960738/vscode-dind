@@ -1,6 +1,17 @@
 # 基础开发环境镜像：php:8.4-bookworm
 FROM php:8.4-bookworm AS php-base
 
+# 安装基础工具
+RUN apt-get update && apt-get install -y --no-install-recommends \
+	git \
+	curl \
+	wget \
+	sudo \
+	ca-certificates \
+	python3-pip \
+	python3-dev \
+	&& rm -rf /var/lib/apt/lists/*
+
 RUN \
 	# 安装 composer
 	wget -O /usr/bin/composer https://github.com/composer/composer/releases/latest/download/composer.phar && \
