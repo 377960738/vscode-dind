@@ -1,4 +1,96 @@
 # 基础镜像：code-server
+FROM php:8.4-cli-bookworm AS php-env
+
+# 安装系统级依赖 (这些是编译PHP扩展所必须的底层库)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+	git curl wget unzip \
+	libzip-dev libpng-dev libjpeg-dev libfreetype6-dev \
+	libonig-dev libxml2-dev libssl-dev libcurl4-openssl-dev libicu-dev \
+	libreadline-dev libsqlite3-dev libyaml-dev libevent-dev libmagickwand-dev \
+	zlib1g-dev libxslt1-dev libbrotli-dev libnghttp2-dev libcares-dev libuv1-dev \
+	libsodium-dev libmemcached-dev libpq-dev \
+	&& rm -rf /var/lib/apt/lists/*
+
+# 2. 下载并安装 install-php-extensions 脚本 # RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
+RUN curl -sSL -o /usr/local/bin/install-php-extensions \
+	https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions && \
+	chmod +x /usr/local/bin/install-php-extensions
+
+RUN \
+	# 安装 composer
+	wget -O /usr/bin/composer https://github.com/composer/composer/releases/latest/download/composer.phar && \
+	chmod +x /usr/bin/composer && \
+	\
+	# 安装 php-extension-installer
+	wget -O /usr/local/bin/install-php-extensions https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions && \
+	chmod +x /usr/local/bin/install-php-extensions && \
+	\
+	# 安装 PHP 扩展
+	# IPE_GD_WITHOUTAVIF=y \
+	# IPE_ICU_EN_ONLY=y \
+	IPE_SWOOLE_WITHOUT_IOURING=y \
+	install-php-extensions \
+	@fix_letsencrypt \
+	apcu \
+	bcmath \
+	Core \
+	ctype \
+	curl \
+	date \
+	dom \
+	event \
+	fileinfo \
+	filter\
+	gd \
+	gettext \
+	hash \
+	iconv\
+	igbinary \
+	inotify \
+	intl \
+	json \
+	libxml\
+	mbstring \
+	mongodb \
+	mysqlnd \
+	opcache \
+	openssl \
+	pcntl \
+	pcre \
+	PDO \
+	pdo_mysql \
+	pdo_pgsql \
+	pdo_sqlite \
+	Phar \
+	posix \
+	random \
+	readline \
+	redis \
+	Reflection \
+	session \
+	SimpleXML \
+	soap \
+	sockets \
+	sodium \
+	SPL \
+	sqlite3 \
+	standard \
+	swoole \
+	sysvmsg \
+	sysvsem \
+	swoole \
+	tokenizer \
+	xlswriter \
+	xml \
+	xmlreader \
+	xmlwriter \
+	yaml \
+	zip \
+	zlib && \
+	# 启用 APCu CLI 模式支持
+	echo "apc.enable_cli=1" >> /usr/local/etc/php/conf.d/docker-php-ext-apcu.ini && \
+	apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
 FROM codercom/code-server:latest
 
 USER root
@@ -61,75 +153,21 @@ RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - && \
 	apt-get update && apt-get install -y --no-install-recommends nodejs && \
 	rm -rf /var/lib/apt/lists/*
 
-# 安装 PHP（支持版本指定）
-ARG PHP_VERSION=8.2
-RUN curl -sSL https://packages.sury.org/php/+archive.key | gpg --dearmor -o /usr/share/keyrings/php-sury.gpg && \
-	echo "deb [signed-by=/usr/share/keyrings/php-sury.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php-sury.list && \
-	apt-get update && \
-	apt-get install -y --no-install-recommends \
-	php${PHP_VERSION} \
-	php${PHP_VERSION}-cli \
-	php${PHP_VERSION}-fpm \
-	php${PHP_VERSION}-mbstring \
-	php${PHP_VERSION}-xml \
-	php${PHP_VERSION}-curl \
-	php${PHP_VERSION}-zip \
-	php${PHP_VERSION}-intl \
-	php${PHP_VERSION}-readline \
-	php${PHP_VERSION}-pdo \
-	php${PHP_VERSION}-mysql \
-	php${PHP_VERSION}-pgsql \
-	php${PHP_VERSION}-sqlite3 \
-	php${PHP_VERSION}-soap \
-	php${PHP_VERSION}-bcmath \
-	php${PHP_VERSION}-gd \
-	php${PHP_VERSION}-redis \
-	php${PHP_VERSION}-apcu \
-	php${PHP_VERSION}-yaml \
-	php${PHP_VERSION}-event \
-	php${PHP_VERSION}-sockets \
-	php${PHP_VERSION}-pcntl \
-	php${PHP_VERSION}-opcache \
-	php${PHP_VERSION}-igbinary \
-	php${PHP_VERSION}-msgpack \
-	php${PHP_VERSION}-imagick \
-	php${PHP_VERSION}-xdebug \
-	&& ln -sf /usr/bin/php${PHP_VERSION} /usr/bin/php \
-	&& ln -sf /usr/bin/php${PHP_VERSION} /usr/bin/phpize \
-	&& ln -sf /usr/bin/php-config${PHP_VERSION} /usr/bin/php-config \
-	&& rm -rf /var/lib/apt/lists/*
-
-# 下载并安装 docker-php-extension-installer
-RUN curl -sSL -o /usr/local/bin/install-php-extensions https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions && \
-	chmod +x /usr/local/bin/install-php-extensions
-# 安装 PHP 扩展
-RUN apt-get update && apt-get install -y --no-install-recommends \
-	libz-dev \
-	libssl-dev \
-	libnghttp2-dev \
-	libcares-dev \
-	libuv1-dev \
-	libbrotli-dev \
-	&& IPE_SWOOLE_WITHOUT_IOURING=y install-php-extensions \
-	@fix_letsencrypt \
-	swoole \
-	mongodb \
-	inotify \
-	xlswriter \
-	&& rm -rf /var/lib/apt/lists/*
-
-# 启用 APCu CLI
-RUN echo "apc.enable_cli=1" >> /etc/php/8.4/cli/conf.d/20-apcu.ini
-
-# 安装 Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
+# 复制完整的 PHP 环境
+COPY --from=php-env /usr/bin/php /usr/bin/php
+COPY --from=php-env /usr/bin/phpize /usr/bin/phpize
+COPY --from=php-env /usr/bin/php-config /usr/bin/php-config
+COPY --from=php-env /usr/bin/composer /usr/bin/composer
+COPY --from=php-env /usr/local/bin/install-php-extensions /usr/local/bin/install-php-extensions
+COPY --from=php-env /usr/local/etc/php /usr/local/etc/php
+COPY --from=php-env /usr/lib/php /usr/lib/php
 
 # 切换回 coder 用户
 USER coder
 
-# 设置 shell 别名（支持 ll 和 la 命令）
-RUN echo "alias ll='ls -la'" >> ~/.bashrc && \
-	echo "alias la='ls -la'" >> ~/.bashrc
+RUN echo "alias ll='ls -la --color=auto'" >> ~/.bashrc && \
+	echo "alias la='ls -la --color=auto'" >> ~/.bashrc && \
+	echo "alias ls='ls --color=auto'" >> ~/.bashrc
 
 # 设置工作目录
 WORKDIR /workspace
