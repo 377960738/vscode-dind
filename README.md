@@ -144,8 +144,6 @@ RUN sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/ss
 - Git
 - Node.js + npm
 - Python 3 + pip
-- PHP（支持版本指定，默认 8.2）+ Composer
-  - 包含常用扩展：`apcu`、`bcmath`、`curl`、`gd`、`gettext`、   `igbinary`、`intl`、`mbstring`、`mongodb`、`mysql`、`opcache`、`pgsql`、`pdo`、`pdo_mysql`、`pdo_pgsql`、`pdo_sqlite`、`redis`、`soap`、`sockets`、`sodium`、`sqlite3`、`swoole`、`xml`、`xmlreader`、`xmlwriter`、`yaml`、`zip`、`event`、`inotify`、`xlswriter`
 
 ## 常见问题
 
