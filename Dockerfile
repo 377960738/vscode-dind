@@ -4,11 +4,32 @@ FROM php:8.4-cli-bookworm AS php-env
 # 安装系统级依赖 (这些是编译PHP扩展所必须的底层库)
 RUN apt-get update && apt-get install -y --no-install-recommends \
 	git curl wget unzip \
-	libzip-dev libpng-dev libjpeg-dev libfreetype6-dev \
-	libonig-dev libxml2-dev libssl-dev libcurl4-openssl-dev libicu-dev \
-	libreadline-dev libsqlite3-dev libyaml-dev libevent-dev libmagickwand-dev \
-	zlib1g-dev libxslt1-dev libbrotli-dev libnghttp2-dev libcares-dev libuv1-dev \
-	libsodium-dev libmemcached-dev libpq-dev \
+	libzip-dev \
+	libpng-dev \
+	libjpeg-dev \
+	libfreetype6-dev \
+	libonig-dev \
+	libxml2-dev \
+	libssl-dev \
+	libcurl4-openssl-dev \
+	libicu-dev \
+	libreadline-dev \
+	libsqlite3-dev \
+	libyaml-dev \
+	libevent-dev \
+	# 修正 ImageMagick 包名 (Debian 12)
+	libmagickwand-6.q16-dev \
+	zlib1g-dev \
+	libxslt1-dev \
+	libbrotli-dev \
+	libnghttp2-dev \
+	libcares-dev \
+	libuv1-dev \
+	libsodium-dev \
+	libmemcached-dev \
+	libpq-dev \
+	libc-client-dev \
+	libkrb5-dev \
 	&& rm -rf /var/lib/apt/lists/*
 
 # 2. 下载并安装 install-php-extensions 脚本 # RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
@@ -108,28 +129,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	ca-certificates \
 	python3-pip \
 	python3-dev \
-	# 安装 PHP 依赖库 (Debian 版)
-	gnupg2 \
-	lsb-release \
-	apt-transport-https \
-	software-properties-common \
-	xml2 \
-	libxml2-dev \
-	libcurl4-openssl-dev \
-	libssl-dev \
-	libpng-dev \
-	libjpeg-dev \
-	libfreetype6-dev \
-	libzip-dev \
-	libonig-dev \
-	libxslt1-dev \
-	libicu-dev \
-	libreadline-dev \
-	libsqlite3-dev \
-	libyaml-dev \
-	libevent-dev \
-	libmagickwand-dev \
-	zlib1g-dev \
 	&& rm -rf /var/lib/apt/lists/*
 
 # 配置 SSH 服务
