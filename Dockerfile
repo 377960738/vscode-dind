@@ -16,6 +16,28 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	ca-certificates \
 	python3-pip \
 	python3-dev \
+	# 安装 PHP 依赖库 (Debian 版)
+	gnupg2 \
+	lsb-release \
+	apt-transport-https \
+	software-properties-common \
+	xml2 \
+	libxml2-dev \
+	libcurl4-openssl-dev \
+	libssl-dev \
+	libpng-dev \
+	libjpeg-dev \
+	libfreetype6-dev \
+	libzip-dev \
+	libonig-dev \
+	libxslt1-dev \
+	libicu-dev \
+	libreadline-dev \
+	libsqlite3-dev \
+	libyaml-dev \
+	libevent-dev \
+	libmagickwand-dev \
+	zlib1g-dev \
 	&& rm -rf /var/lib/apt/lists/*
 
 # 配置 SSH 服务
@@ -41,86 +63,66 @@ RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - && \
 
 # 安装 PHP（支持版本指定）
 ARG PHP_VERSION=8.2
-RUN curl -fsSL https://packages.sury.org/php/README.txt | bash - && \
-	apt-get update && apt-get install -y --no-install-recommends \
+RUN curl -sSL https://packages.sury.org/php/+archive.key | gpg --dearmor -o /usr/share/keyrings/php-sury.gpg && \
+	echo "deb [signed-by=/usr/share/keyrings/php-sury.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php-sury.list && \
+	apt-get update && \
+	apt-get install -y --no-install-recommends \
 	php${PHP_VERSION} \
 	php${PHP_VERSION}-cli \
 	php${PHP_VERSION}-fpm \
-	# 安装 composer
-	wget -O /usr/bin/composer https://github.com/composer/composer/releases/latest/download/composer.phar && \
-	chmod +x /usr/bin/composer && \
-	\
-	# 使 busybox 支持特权命令
-	chmod 4755 /bin/busybox && \
-	\
-	# 安装 php-extension-installer
-	wget -O /usr/local/bin/install-php-extensions https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions && \
-	chmod +x /usr/local/bin/install-php-extensions && \
-	\
-	# 安装 PHP 扩展
-	# IPE_GD_WITHOUTAVIF=y \
-	# IPE_ICU_EN_ONLY=y \
-	IPE_SWOOLE_WITHOUT_IOURING=y \
-	install-php-extensions \
+	php${PHP_VERSION}-mbstring \
+	php${PHP_VERSION}-xml \
+	php${PHP_VERSION}-curl \
+	php${PHP_VERSION}-zip \
+	php${PHP_VERSION}-intl \
+	php${PHP_VERSION}-readline \
+	php${PHP_VERSION}-pdo \
+	php${PHP_VERSION}-mysql \
+	php${PHP_VERSION}-pgsql \
+	php${PHP_VERSION}-sqlite3 \
+	php${PHP_VERSION}-soap \
+	php${PHP_VERSION}-bcmath \
+	php${PHP_VERSION}-gd \
+	php${PHP_VERSION}-redis \
+	php${PHP_VERSION}-apcu \
+	php${PHP_VERSION}-yaml \
+	php${PHP_VERSION}-event \
+	php${PHP_VERSION}-sockets \
+	php${PHP_VERSION}-pcntl \
+	php${PHP_VERSION}-opcache \
+	php${PHP_VERSION}-igbinary \
+	php${PHP_VERSION}-msgpack \
+	php${PHP_VERSION}-imagick \
+	php${PHP_VERSION}-xdebug \
+	&& ln -sf /usr/bin/php${PHP_VERSION} /usr/bin/php \
+	&& ln -sf /usr/bin/php${PHP_VERSION} /usr/bin/phpize \
+	&& ln -sf /usr/bin/php-config${PHP_VERSION} /usr/bin/php-config \
+	&& rm -rf /var/lib/apt/lists/*
+
+# 下载并安装 docker-php-extension-installer
+RUN curl -sSL -o /usr/local/bin/install-php-extensions https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions && \
+	chmod +x /usr/local/bin/install-php-extensions
+# 安装 PHP 扩展
+RUN apt-get update && apt-get install -y --no-install-recommends \
+	libz-dev \
+	libssl-dev \
+	libnghttp2-dev \
+	libcares-dev \
+	libuv1-dev \
+	libbrotli-dev \
+	&& IPE_SWOOLE_WITHOUT_IOURING=y install-php-extensions \
 	@fix_letsencrypt \
-	apcu \
-	bcmath \
-	Core \
-	ctype \
-	curl \
-	date \
-	dom \
-	event \
-	fileinfo \
-	filter\
-	gd \
-	gettext \
-	hash \
-	iconv\
-	igbinary \
-	inotify \
-	intl \
-	json \
-	libxml\
-	mbstring \
+	swoole \
 	mongodb \
-	mysqlnd \
-	opcache \
-	openssl \
-	pcntl \
-	pcre \
-	PDO \
-	pdo_mysql \
-	pdo_pgsql \
-	pdo_sqlite \
-	Phar \
-	posix \
-	random \
-	readline \
-	redis \
-	Reflection \
-	session \
-	SimpleXML \
-	soap \
-	sockets \
-	sodium \
-	SPL \
-	sqlite3 \
-	standard \
-	swoole \
-	sysvmsg \
-	sysvsem \
-	swoole \
-	tokenizer \
+	inotify \
 	xlswriter \
-	xml \
-	xmlreader \
-	xmlwriter \
-	yaml \
-	zip \
-	zlib && \
-	echo "alias ll='ls -l'" >> ~/.bashrc && \
-	echo "alias la='ls -la'" >> ~/.bashrc
+	&& rm -rf /var/lib/apt/lists/*
+
+# 启用 APCu CLI
+RUN echo "apc.enable_cli=1" >> /etc/php/8.4/cli/conf.d/20-apcu.ini
+
+# 安装 Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
 
 # 切换回 coder 用户
 USER coder
