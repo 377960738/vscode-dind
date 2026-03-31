@@ -50,10 +50,9 @@ RUN mkdir -p /run/sshd && \
 RUN usermod -aG docker coder && \
 	usermod -aG sudo coder && \
 	echo "coder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
-	# 设置 root 密码（仅调试）
-	echo "root:123456" | chpasswd;
+	echo "root:123456" | chpasswd
 
-COPY .bash_aliases /home/coder/.bash_aliases
+COPY --chown=coder:coder .bash_aliases /home/coder/.bash_aliases
 
 # 创建工作目录
 RUN mkdir -p /workspace && chown -R coder:coder /workspace
