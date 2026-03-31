@@ -48,7 +48,9 @@ RUN mkdir -p /run/sshd && \
 # coder 用户添加到 docker 和 sudo 组
 RUN usermod -aG docker coder && \
 	usermod -aG sudo coder && \
-	echo "coder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+	echo "coder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
+	# 设置 root 密码（仅调试）
+	echo "root:123456" | chpasswd;
 
 # 创建工作目录
 RUN mkdir -p /workspace && chown -R coder:coder /workspace
@@ -62,14 +64,12 @@ RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - && \
 # 切换回 coder 用户
 USER coder
 
-RUN echo "alias ll='ls -la --color=auto'" >> ~/.bashrc && \
-	echo "alias la='ls -la --color=auto'" >> ~/.bashrc && \
-	echo "alias ls='ls --color=auto'" >> ~/.bashrc
+RUN echo "alias ll='ls -la --color=auto'" >> /home/coder/.bashrc && \
+	echo "alias la='ls -la --color=auto'" >> /home/coder/.bashrc && \
+	echo "alias ls='ls --color=auto'" >> /home/coder/.bashrc
 
 # 设置工作目录
 WORKDIR /workspace
-
-ENV PATH="${BASE_DIR}/.local/bin:${PATH}"
 
 # 暴露端口
 EXPOSE 8443 22
