@@ -17,6 +17,25 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	python3-pip \
 	python3-dev \
 	python3-venv \
+	build-essential \
+	pkg-config \
+	autoconf \
+	automake \
+	libtool \
+	make m4 \
+	libcurl4-openssl-dev \
+	libpng-dev libjpeg-dev libfreetype6-dev \
+	libzip-dev \
+	libbz2-dev \
+	libicu-dev \
+	libpq-dev \
+	libmariadb-dev \
+	libsodium-dev \
+	libgmp-dev \
+	libxslt1-dev \
+	libmagickwand-dev \
+	libhiredis-dev \
+	libxml2-dev sqlite3 libsqlite3-dev libssl-dev zlib1g-dev \
 	&& rm -rf /var/lib/apt/lists/*
 
 # 配置 SSH 服务
