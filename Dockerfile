@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	git \
 	curl \
 	wget \
+	vim \
 	openssh-server \
 	sudo \
 	ca-certificates \
@@ -52,6 +53,8 @@ RUN usermod -aG docker coder && \
 	# 设置 root 密码（仅调试）
 	echo "root:123456" | chpasswd;
 
+COPY .bash_aliases /home/coder/.bash_aliases
+
 # 创建工作目录
 RUN mkdir -p /workspace && chown -R coder:coder /workspace
 
@@ -63,10 +66,6 @@ RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - && \
 
 # 切换回 coder 用户
 USER coder
-
-RUN echo "alias ll='ls -la --color=auto'" >> /home/coder/.bashrc && \
-	echo "alias la='ls -la --color=auto'" >> /home/coder/.bashrc && \
-	echo "alias ls='ls --color=auto'" >> /home/coder/.bashrc
 
 # 设置工作目录
 WORKDIR /workspace
