@@ -7,6 +7,7 @@ services:
         NODE_VERSION: ${NODE_VERSION:-20}
     container_name: ${CONTAINER_NAME:-vscode-dind}
     image: ${REGISTRY_IMAGE:-vscode-dind}:${TAG:-dev}
+    privileged: true
 
     volumes:
       # Docker socket 挂载（与宿主机 Docker daemon 通信）

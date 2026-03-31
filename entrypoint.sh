@@ -3,6 +3,16 @@ set -e
 
 echo "🔧 DIND 开发环境自检中..."
 
+# .bash_aliases (如果不存在)
+if [ ! -f /home/coder/.bash_aliases ]; then
+    cat > /home/coder/.bash_aliases << 'EOF'
+alias ll='ls -la --color=auto'
+alias la='ls -la --color=auto'
+alias ls='ls --color=auto'
+EOF
+    chown coder:coder /home/coder/.bash_aliases
+fi
+
 # === 1. 修复关键目录权限 ===
 if [ "$(stat -c %U:%G /home/coder)" != "coder:coder" ]; then
     echo "→ 修复目录权限..."

@@ -49,10 +49,7 @@ RUN mkdir -p /run/sshd && \
 # coder 用户添加到 docker 和 sudo 组
 RUN usermod -aG docker coder && \
 	usermod -aG sudo coder && \
-	echo "coder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
-	echo "root:123456" | chpasswd
-
-COPY --chown=coder:coder .bash_aliases /home/coder/.bash_aliases
+	echo "coder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # 创建工作目录
 RUN mkdir -p /workspace && chown -R coder:coder /workspace
