@@ -55,7 +55,7 @@ RUN usermod -aG docker coder && \
 RUN mkdir -p /workspace && chown -R coder:coder /workspace
 
 # 安装 Node.js（支持版本指定）
-ARG NODE_VERSION=24
+ARG NODE_VERSION=22
 RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - && \
 	apt-get update && apt-get install -y --no-install-recommends nodejs && \
 	rm -rf /var/lib/apt/lists/*
