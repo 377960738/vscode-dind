@@ -142,7 +142,7 @@ RUN sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/ss
 
 - Docker CLI + Docker Compose
 - Git
-- Node.js + npm
+- ~~Node.js + npm~~
 - Python 3 + pip
 
 ## 常见问题
@@ -163,9 +163,6 @@ A: 修改 Dockerfile 的 `RUN apt-get install` 部分，重新构建镜像。
 
 1. 访问 code-server 安装扩展
 2. 配置 Git（`git config --global user.name` 等）
-3. 为后端项目安装依赖（PHP Composer）
-4. 为前端项目安装依赖（npm/pnpm）
-5. 配置调试器（XDebug for PHP, Chrome DevTools for JavaScript）
 
 ## 相关资源
 

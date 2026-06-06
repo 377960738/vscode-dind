@@ -6,7 +6,7 @@
 
 - ✅ 基础镜像：code-server（专业开发工具）
 - ✅ Python：系统自带 python3（Debian stable）
-- ✅ Node.js：通过 NodeSource 仓库安装（支持版本指定）
+- ~~✅ Node.js：通过 NodeSource 仓库安装（支持版本指定）~~
 
 ## 支持的版本
 
@@ -15,17 +15,16 @@
 - 系统自带 Python 3（Debian 内置，通常是 3.11）
 - 如需其他版本，容器内 pip install 即可
 
-### Node.js 版本
+### ~~Node.js 版本~~
 
-- 20 (LTS，默认)
+- ~~20 (LTS，默认)~~
 
 ## 配置
 
-### 编辑 .env 文件 `（例：修改 Node.js 版本）`
+### 编辑 .env 文件 `（例：修改 SSH 端口）`
 
 ```env
-# Node.js 版本 (14, 16, 18, 20)
-NODE_VERSION=18
+SSH_PORT=XXXX
 ```
 
 ### 然后重新构建
@@ -53,9 +52,9 @@ docker compose exec vscode-dind docker ps -a
 docker-compose exec -u coder vscode-dind python3 --version
 docker-compose exec -u coder vscode-dind pip3 --version
 
-# 检查 Node.js
-docker-compose exec -u coder vscode-dind node --version
-docker-compose exec -u coder vscode-dind npm --version
+## 检查 Node.js
+#docker-compose exec -u coder vscode-dind node --version
+#docker-compose exec -u coder vscode-dind npm --version
 ```
 
 ## 添加更多工具 `(需重新构建)`
