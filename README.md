@@ -22,7 +22,7 @@ vscode-dind/
 docker-compose build
 
 # 启动容器
-bash ./start.sh
+docker compose up -d
 
 # 查看日志
 docker-compose logs -f vscode-dind
