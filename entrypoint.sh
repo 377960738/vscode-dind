@@ -59,4 +59,4 @@ sudo /usr/sbin/sshd -D -o PidFile=/run/sshd.pid &
 
 # === 5. 启动 code-server（主进程）===
 echo "运行 code-server..."
-exec code-server --bind-addr 0.0.0.0:8443  --password ${CODER_PASSWORD} /workspace
+exec code-server --bind-addr 0.0.0.0:8443 /workspace
