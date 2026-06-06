@@ -142,7 +142,7 @@ RUN sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/ss
 
 - Docker CLI + Docker Compose
 - Git
-- ~~Node.js + npm~~
+- Node.js + npm
 - Python 3 + pip
 
 ## 常见问题

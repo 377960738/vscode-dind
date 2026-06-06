@@ -6,7 +6,7 @@
 
 - ✅ 基础镜像：code-server（专业开发工具）
 - ✅ Python：系统自带 python3（Debian stable）
-- ~~✅ Node.js：通过 NodeSource 仓库安装（支持版本指定）~~
+- ✅ Node.js：通过 NodeSource 仓库安装（支持版本指定）
 
 ## 支持的版本
 
@@ -52,9 +52,9 @@ docker compose exec vscode-dind docker ps -a
 docker-compose exec -u coder vscode-dind python3 --version
 docker-compose exec -u coder vscode-dind pip3 --version
 
-## 检查 Node.js
-#docker-compose exec -u coder vscode-dind node --version
-#docker-compose exec -u coder vscode-dind npm --version
+# 检查 Node.js
+docker-compose exec -u coder vscode-dind node --version
+docker-compose exec -u coder vscode-dind npm --version
 ```
 
 ## 添加更多工具 `(需重新构建)`
