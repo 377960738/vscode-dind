@@ -1,5 +1,5 @@
 # 基础镜像：code-server
-FROM codercom/code-server:latest
+FROM codercom/code-server:debian
 
 USER root
 

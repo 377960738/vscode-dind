@@ -45,11 +45,11 @@ else
 fi
 
 # === 3. 设置 SSH 密码 ===
-if [ -n "${DIND_PASSWORD}" ]; then
+if [ -n "${SSH_PASSWORD}" ]; then
     echo "→ 更新 SSH 密码..."
-    echo "coder:${DIND_PASSWORD}" | sudo chpasswd
+    echo "coder:${SSH_PASSWORD}" | sudo chpasswd
 else
-    echo "⚠️ 未设置 DIND_PASSWORD，SSH 密码保持默认或空"
+    echo "⚠️ 未设置 SSH_PASSWORD 密码保持默认或空"
 fi
 
 # === 4. 启动 SSH 服务（后台）===
@@ -59,4 +59,4 @@ sudo /usr/sbin/sshd -D -o PidFile=/run/sshd.pid &
 
 # === 5. 启动 code-server（主进程）===
 echo "运行 code-server..."
-exec code-server --bind-addr 0.0.0.0:8443 /workspace
+exec code-server --bind-addr 0.0.0.0:8443  --password ${CODER_PASSWORD} /workspace
